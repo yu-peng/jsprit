@@ -19,7 +19,9 @@ package com.graphhopper.jsprit.core.algorithm.ruin;
 
 import com.graphhopper.jsprit.core.algorithm.ruin.distance.JobDistance;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
+import com.graphhopper.jsprit.core.problem.job.Delivery;
 import com.graphhopper.jsprit.core.problem.job.Job;
+import com.graphhopper.jsprit.core.problem.job.Pickup;
 import com.graphhopper.jsprit.core.problem.solution.route.VehicleRoute;
 import com.graphhopper.jsprit.core.util.RandomUtils;
 import org.slf4j.Logger;
@@ -136,11 +138,48 @@ public final class RuinRadial extends AbstractRuinStrategy {
         int nNeighbors = nOfJobs2BeRemoved - 1;
         removeJob(targetJob, vehicleRoutes);
         unassignedJobs.add(targetJob);
+
+        if (targetJob instanceof Pickup) {
+            // Check if the following job should be removed
+            Job paired = ((Pickup) targetJob).getPairedDelivery();
+            if (paired != null && paired instanceof Delivery) {
+                if (removeJob(paired, vehicleRoutes)) {
+                    unassignedJobs.add(paired);
+                }
+            }
+        } else if (targetJob instanceof Delivery) {
+            // Check if the preceeding job should be removed
+            Job paired = ((Delivery) targetJob).getPairedPickup();
+            if (paired != null && paired instanceof Pickup) {
+                if (removeJob(paired, vehicleRoutes)) {
+                    unassignedJobs.add(paired);
+                }
+            }
+        }
+
         Iterator<Job> neighborhoodIterator = jobNeighborhoods.getNearestNeighborsIterator(nNeighbors, targetJob);
         while (neighborhoodIterator.hasNext()) {
             Job job = neighborhoodIterator.next();
             if (removeJob(job, vehicleRoutes)) {
                 unassignedJobs.add(job);
+
+                if (job instanceof Pickup) {
+                    // Check if the following job should be removed
+                    Job paired = ((Pickup) job).getPairedDelivery();
+                    if (paired != null && paired instanceof Delivery) {
+                        if (removeJob(paired, vehicleRoutes)) {
+                            unassignedJobs.add(paired);
+                        }
+                    }
+                } else if (job instanceof Delivery) {
+                    // Check if the preceeding job should be removed
+                    Job paired = ((Delivery) job).getPairedPickup();
+                    if (paired != null && paired instanceof Pickup) {
+                        if (removeJob(paired, vehicleRoutes)) {
+                            unassignedJobs.add(paired);
+                        }
+                    }
+                }
             }
         }
         return unassignedJobs;

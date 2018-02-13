@@ -18,7 +18,9 @@
 package com.graphhopper.jsprit.core.algorithm.ruin;
 
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
+import com.graphhopper.jsprit.core.problem.job.Delivery;
 import com.graphhopper.jsprit.core.problem.job.Job;
+import com.graphhopper.jsprit.core.problem.job.Pickup;
 import com.graphhopper.jsprit.core.problem.solution.route.VehicleRoute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,9 +83,27 @@ public final class RuinRandom extends AbstractRuinStrategy {
         Collections.shuffle(availableJobs, random);
         int removed = 0;
         for (Job job : availableJobs) {
-            if (removed == nOfJobs2BeRemoved) break;
+            if (removed == nOfJobs2BeRemoved)
+                break;
             if (removeJob(job, vehicleRoutes)) {
                 unassignedJobs.add(job);
+                if (job instanceof Pickup) {
+                    // Check if the following job should be removed
+                    Job paired = ((Pickup) job).getPairedDelivery();
+                    if (paired != null && paired instanceof Delivery) {
+                        if (removeJob(paired, vehicleRoutes)) {
+                            unassignedJobs.add(paired);
+                        }
+                    }
+                } else if (job instanceof Delivery) {
+                    // Check if the preceeding job should be removed
+                    Job paired = ((Delivery) job).getPairedPickup();
+                    if (paired != null && paired instanceof Pickup) {
+                        if (removeJob(paired, vehicleRoutes)) {
+                            unassignedJobs.add(paired);
+                        }
+                    }
+                }
             }
             removed++;
         }

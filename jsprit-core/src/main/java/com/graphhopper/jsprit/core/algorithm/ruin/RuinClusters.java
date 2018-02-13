@@ -19,7 +19,9 @@ package com.graphhopper.jsprit.core.algorithm.ruin;
 
 import com.graphhopper.jsprit.core.algorithm.listener.IterationStartsListener;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
+import com.graphhopper.jsprit.core.problem.job.Delivery;
 import com.graphhopper.jsprit.core.problem.job.Job;
+import com.graphhopper.jsprit.core.problem.job.Pickup;
 import com.graphhopper.jsprit.core.problem.solution.VehicleRoutingProblemSolution;
 import com.graphhopper.jsprit.core.problem.solution.route.VehicleRoute;
 import com.graphhopper.jsprit.core.problem.solution.route.activity.TourActivity;
@@ -150,6 +152,28 @@ public final class RuinClusters extends AbstractRuinStrategy implements Iteratio
                 if (removeJob(j, vehicleRoutes)) {
                     lastRemoved.add(j);
                     unassignedJobs.add(j);
+                    
+                    if (j instanceof Pickup) {
+                        // Check if the following job should be removed
+                        Job paired = ((Pickup) j).getPairedDelivery();
+                        if (paired != null && paired instanceof Delivery) {
+                            if (removeJob(paired, vehicleRoutes)) {
+                                unassignedJobs.add(paired);
+                                lastRemoved.add(paired);
+                                toRemove--;
+                            }
+                        }
+                    } else if (j instanceof Delivery) {
+                        // Check if the preceeding job should be removed
+                        Job paired = ((Delivery) j).getPairedPickup();
+                        if (paired != null && paired instanceof Pickup) {
+                            if (removeJob(paired, vehicleRoutes)) {
+                                unassignedJobs.add(paired);
+                                lastRemoved.add(paired);
+                                toRemove--;
+                            }
+                        }
+                    }
                 }
                 toRemove--;
             }

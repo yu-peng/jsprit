@@ -19,7 +19,9 @@ package com.graphhopper.jsprit.core.algorithm.ruin;
 
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
 import com.graphhopper.jsprit.core.problem.driver.DriverImpl;
+import com.graphhopper.jsprit.core.problem.job.Delivery;
 import com.graphhopper.jsprit.core.problem.job.Job;
+import com.graphhopper.jsprit.core.problem.job.Pickup;
 import com.graphhopper.jsprit.core.problem.solution.route.VehicleRoute;
 import com.graphhopper.jsprit.core.problem.solution.route.activity.TourActivity;
 import com.graphhopper.jsprit.core.problem.vehicle.Vehicle;
@@ -89,6 +91,23 @@ public final class RuinWorst extends AbstractRuinStrategy {
             if (removeJob(worst, vehicleRoutes)) {
                 availableJobs.remove(worst);
                 unassignedJobs.add(worst);
+                if (worst instanceof Pickup) {
+                    // Check if the following job should be removed
+                    Job paired = ((Pickup) worst).getPairedDelivery();
+                    if (paired != null && paired instanceof Delivery) {
+                        if (removeJob(paired, vehicleRoutes)) {
+                            unassignedJobs.add(paired);
+                        }
+                    }
+                } else if (worst instanceof Delivery) {
+                    // Check if the preceeding job should be removed
+                    Job paired = ((Delivery) worst).getPairedPickup();
+                    if (paired != null && paired instanceof Pickup) {
+                        if (removeJob(paired, vehicleRoutes)) {
+                            unassignedJobs.add(paired);
+                        }
+                    }
+                }
             }
             toRemove--;
         }
