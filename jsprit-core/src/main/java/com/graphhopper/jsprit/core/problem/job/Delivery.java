@@ -24,6 +24,8 @@ package com.graphhopper.jsprit.core.problem.job;
  * @author schroeder
  */
 public class Delivery extends Service {
+    
+    private Service pairedPickup;
 
     public static class Builder extends Service.Builder<Delivery> {
 
@@ -68,5 +70,12 @@ public class Delivery extends Service {
         super(builder);
 
     }
+    
+    public Service getPairedPickup() {
+        return pairedPickup;
+    }
 
+    public void setPairedPickup(Service pairedPickup) {
+        this.pairedPickup = pairedPickup;
+    }
 }

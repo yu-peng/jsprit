@@ -22,8 +22,13 @@ package com.graphhopper.jsprit.core.algorithm.ruin;
 import com.graphhopper.jsprit.core.algorithm.ruin.listener.RuinListener;
 import com.graphhopper.jsprit.core.algorithm.ruin.listener.RuinListeners;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
+import com.graphhopper.jsprit.core.problem.job.Delivery;
 import com.graphhopper.jsprit.core.problem.job.Job;
+import com.graphhopper.jsprit.core.problem.job.Pickup;
 import com.graphhopper.jsprit.core.problem.solution.route.VehicleRoute;
+import com.graphhopper.jsprit.core.problem.solution.route.activity.DeliverService;
+import com.graphhopper.jsprit.core.problem.solution.route.activity.PickupService;
+import com.graphhopper.jsprit.core.problem.solution.route.activity.TourActivity;
 import com.graphhopper.jsprit.core.util.RandomNumberGeneration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +68,37 @@ public abstract class AbstractRuinStrategy implements RuinStrategy {
     @Override
     public Collection<Job> ruin(Collection<VehicleRoute> vehicleRoutes) {
         ruinListeners.ruinStarts(vehicleRoutes);
+
+        for (VehicleRoute route : vehicleRoutes) {
+            if (route.isEmpty())
+                continue;
+            TourActivity actBefore = route.getStart();
+            TourActivity actToEval = null;
+            for (TourActivity act : route.getActivities()) {
+                if (actToEval == null) {
+                    actToEval = act;
+                    continue;
+                }
+
+                actBefore = actToEval;
+                actToEval = act;
+
+                if (actToEval instanceof PickupService) {
+                    ((Pickup) ((PickupService) actToEval).getJob()).setPairedDelivery(null);
+                }
+                if (actToEval instanceof DeliverService) {
+                    ((Delivery) ((DeliverService) actToEval).getJob()).setPairedPickup(null);
+                }
+
+                if (actBefore instanceof PickupService && actToEval instanceof DeliverService) {
+                    ((Delivery) ((DeliverService) actToEval).getJob())
+                            .setPairedPickup(((PickupService) actBefore).getJob());
+                    ((Pickup) ((PickupService) actBefore).getJob())
+                            .setPairedDelivery(((DeliverService) actToEval).getJob());
+                }
+            }
+        }
+        
         Collection<Job> unassigned = ruinRoutes(vehicleRoutes);
         logger.trace("ruin: [ruined={}]", unassigned.size());
         ruinListeners.ruinEnds(vehicleRoutes, unassigned);
