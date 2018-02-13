@@ -81,17 +81,17 @@ class UpdateLoads implements ActivityVisitor, StateUpdater, InsertionStartsListe
     }
 
     void insertionStarts(VehicleRoute route) {
-        Capacity loadAtDepot = Capacity.Builder.newInstance().build();
-        Capacity loadAtEnd = Capacity.Builder.newInstance().build();
-        for (Job j : route.getTourActivities().getJobs()) {
-            if (j instanceof Delivery) {
-                loadAtDepot = Capacity.addup(loadAtDepot, j.getSize());
-            } else if (j instanceof Pickup || j instanceof Service) {
-                loadAtEnd = Capacity.addup(loadAtEnd, j.getSize());
-            }
-        }
-        stateManager.putTypedInternalRouteState(route, InternalStates.LOAD_AT_BEGINNING, loadAtDepot);
-        stateManager.putTypedInternalRouteState(route, InternalStates.LOAD_AT_END, loadAtEnd);
+//        Capacity loadAtDepot = Capacity.Builder.newInstance().build();
+//        Capacity loadAtEnd = Capacity.Builder.newInstance().build();
+//        for (Job j : route.getTourActivities().getJobs()) {
+//            if (j instanceof Delivery) {
+//                loadAtDepot = Capacity.addup(loadAtDepot, j.getSize());
+//            } else if (j instanceof Pickup || j instanceof Service) {
+//                loadAtEnd = Capacity.addup(loadAtEnd, j.getSize());
+//            }
+//        }
+//        stateManager.putTypedInternalRouteState(route, InternalStates.LOAD_AT_BEGINNING, loadAtDepot);
+//        stateManager.putTypedInternalRouteState(route, InternalStates.LOAD_AT_END, loadAtEnd);
     }
 
     @Override
@@ -103,15 +103,15 @@ class UpdateLoads implements ActivityVisitor, StateUpdater, InsertionStartsListe
 
     @Override
     public void informJobInserted(Job job2insert, VehicleRoute inRoute, double additionalCosts, double additionalTime) {
-        if (job2insert instanceof Delivery) {
-            Capacity loadAtDepot = stateManager.getRouteState(inRoute, InternalStates.LOAD_AT_BEGINNING, Capacity.class);
-            if (loadAtDepot == null) loadAtDepot = defaultValue;
-            stateManager.putTypedInternalRouteState(inRoute, InternalStates.LOAD_AT_BEGINNING, Capacity.addup(loadAtDepot, job2insert.getSize()));
-        } else if (job2insert instanceof Pickup || job2insert instanceof Service) {
-            Capacity loadAtEnd = stateManager.getRouteState(inRoute, InternalStates.LOAD_AT_END, Capacity.class);
-            if (loadAtEnd == null) loadAtEnd = defaultValue;
-            stateManager.putTypedInternalRouteState(inRoute, InternalStates.LOAD_AT_END, Capacity.addup(loadAtEnd, job2insert.getSize()));
-        }
+//        if (job2insert instanceof Delivery) {
+//            Capacity loadAtDepot = stateManager.getRouteState(inRoute, InternalStates.LOAD_AT_BEGINNING, Capacity.class);
+//            if (loadAtDepot == null) loadAtDepot = defaultValue;
+//            stateManager.putTypedInternalRouteState(inRoute, InternalStates.LOAD_AT_BEGINNING, Capacity.addup(loadAtDepot, job2insert.getSize()));
+//        } else if (job2insert instanceof Pickup || job2insert instanceof Service) {
+//            Capacity loadAtEnd = stateManager.getRouteState(inRoute, InternalStates.LOAD_AT_END, Capacity.class);
+//            if (loadAtEnd == null) loadAtEnd = defaultValue;
+//            stateManager.putTypedInternalRouteState(inRoute, InternalStates.LOAD_AT_END, Capacity.addup(loadAtEnd, job2insert.getSize()));
+//        }
     }
 
     public void informRouteChanged(VehicleRoute route){
