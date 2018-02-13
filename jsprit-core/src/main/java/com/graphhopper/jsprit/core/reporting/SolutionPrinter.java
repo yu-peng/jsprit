@@ -147,17 +147,17 @@ public class SolutionPrinter {
     }
 
     private static void printVerbose(PrintWriter out, VehicleRoutingProblem problem, VehicleRoutingProblemSolution solution) {
-        String leftAlgin = "| %-7s | %-20s | %-21s | %-15s | %-15s | %-15s | %-15s |%n";
-        out.format("+--------------------------------------------------------------------------------------------------------------------------------+%n");
-        out.printf("| detailed solution                                                                                                              |%n");
-        out.format("+---------+----------------------+-----------------------+-----------------+-----------------+-----------------+-----------------+%n");
-        out.printf("| route   | vehicle              | activity              | job             | arrTime         | endTime         | costs           |%n");
+        String leftAlgin = "| %-7s | %-20s | %-21s | %-45s | %-15s | %-15s | %-15s |%n";
+        out.format("+--------------------------------------------------------------------------------------------------------------------------------------------------------------+%n");
+        out.printf("| detailed solution                                                                                                                                            |%n");
+        out.format("+---------+----------------------+-----------------------+-----------------------------------------------+-----------------+-----------------+-----------------+%n");
+        out.printf("| route   | vehicle              | activity              | job                                           | arrTime         | endTime         | costs           |%n");
         int routeNu = 1;
 
         List<VehicleRoute> list = new ArrayList<VehicleRoute>(solution.getRoutes());
         Collections.sort(list , new com.graphhopper.jsprit.core.util.VehicleIndexComparator());
         for (VehicleRoute route : list) {
-            out.format("+---------+----------------------+-----------------------+-----------------+-----------------+-----------------+-----------------+%n");
+            out.format("+---------+----------------------+-----------------------+-----------------------------------------------+-----------------+-----------------+-----------------+%n");
             double costs = 0;
             out.format(leftAlgin, routeNu, getVehicleString(route), route.getStart().getName(), "-", "undef", Math.round(route.getStart().getEndTime()),
                 Math.round(costs));
@@ -185,16 +185,16 @@ public class SolutionPrinter {
                 Math.round(costs));
             routeNu++;
         }
-        out.format("+--------------------------------------------------------------------------------------------------------------------------------+%n");
+        out.format("+--------------------------------------------------------------------------------------------------------------------------------------------------------------+%n");
         if (!solution.getUnassignedJobs().isEmpty()) {
-            out.format("+----------------+%n");
-            out.format("| unassignedJobs |%n");
-            out.format("+----------------+%n");
-            String unassignedJobAlgin = "| %-14s |%n";
+            out.format("+----------------------------------------------+%n");
+            out.format("| unassignedJobs                               |%n");
+            out.format("+----------------------------------------------+%n");
+            String unassignedJobAlgin = "| %-44s |%n";
             for (Job j : solution.getUnassignedJobs()) {
                 out.format(unassignedJobAlgin, j.getId());
             }
-            out.format("+----------------+%n");
+            out.format("+----------------------------------------------+%n");
         }
     }
 
